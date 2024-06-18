@@ -1,16 +1,32 @@
 #  setting up a PostgreSQL database container
 services:
-  # defines a service named postgres
+  # defines a service named postgres (for AuctionService)
   postgres:
     image: postgres
     environment:
       - POSTGRES_PASSWORD=lp1dxing
     # Maps port 5432 of the host machine to port 5432 of the PostgreSQL container. This allows you to connect to the PostgreSQL database using port 5432 on the host machine.
+    # external: internal
     ports:
       - 5432:5432
     volumes:
       # Mounts a volume named pgdata to the container's /var/lib/postgresql/data directory.
-      - pgdata:/var/lib/postgresql/data
-#  This section defines Docker volumes that can be used by services
-volumes:
-  pgdata:
+      # - pgdata:/var/lib/postgresql/data
+
+      #anonymous vol
+      # delete container will delete associated data
+      - /var/lib/postgresql/data
+  mongodb:
+    image: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=lp1dxing
+    ports:
+      - 27017:27017
+    volumes:
+      - /var/lib/mongodb/data
+      # - mongodata:/var/lib/mongodb/data
+#  This section defines Docker volumes that can be used by services (for name volumes)
+# volumes:
+#   pgdata:
+#   mongodata:

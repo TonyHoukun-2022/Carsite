@@ -2,6 +2,7 @@
 using AuctionService.DTOs;
 using AuctionService.Entities;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,17 +28,19 @@ public class AuctionController: ControllerBase
   }
 
   [HttpGet]
-  public async Task<ActionResult<List<AuctionDto>>> GetAllAuctions()
+  public async Task<ActionResult<List<AuctionDto>>> GetAllAuctions(string date)
   {
-    var auctions = await _context.Auctions
-      // eager load of the related Item entity. Eager loading is used to load related entities as part of the initial query, reducing the number of queries sent to the database.
-      .Include(auction => auction.Item)
-      .OrderBy(auction => auction.Item.Make)
-      // This executes the query asynchronously and returns the results as a list.
-      .ToListAsync();
+    //  query against the Auctions table, ordering the results by the Make property of the associated Item. The query is converted to an IQueryable to enable further querying.
+    var query = _context.Auctions.OrderBy(a => a.Item.Make).AsQueryable();
 
-    // map auctions to list of auctionDtos
-    return _mapper.Map<List<AuctionDto>>(auctions);
+    if (!string.IsNullOrEmpty(date))
+    {
+      // include only auctions updated after the specified date
+      query = query.Where(a => a.UpdatedAt.CompareTo(DateTime.Parse(date).ToUniversalTime()) > 0);
+    }
+
+    // rojects the Auction entities to AuctionDto objects using AutoMapper and executes the query asynchronously, returning the results as a list. The ProjectTo method uses the AutoMapper configuration to perform the projection.
+    return await query.ProjectTo<AuctionDto>(_mapper.ConfigurationProvider).ToListAsync();
   }
 
   [HttpGet("{id}")]
