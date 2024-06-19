@@ -26,6 +26,15 @@ services:
     volumes:
       - /var/lib/mongodb/data
       # - mongodata:/var/lib/mongodb/data
+  # for async communications btw services
+  rabbitMq:
+    # lightweight version of RabbitMQ that includes the management plugin for easier monitoring and management.
+    image: rabbitmq:3-management-alpine
+    # host machine port:container port
+    ports:
+      - 5672:5672
+      #  Port 15672 is the default port for the RabbitMQ management plugin. This allows you to access the RabbitMQ management console through a web browser by navigating to http://localhost:15672.
+      - 15672:15672
 #  This section defines Docker volumes that can be used by services (for name volumes)
 # volumes:
 #   pgdata:

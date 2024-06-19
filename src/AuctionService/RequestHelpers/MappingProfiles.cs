@@ -1,6 +1,7 @@
 ﻿using AuctionService.DTOs;
 using AuctionService.Entities;
 using AutoMapper;
+using Contracts;
 
 namespace AuctionService.RequestHelpers;
 
@@ -14,12 +15,15 @@ public class MappingProfiles : Profile
     //  ensures that properties of Item can be mapped directly to properties of AuctionDto.
     CreateMap<Item, AuctionDto>();
 
-    // map all properties of a CreateAuctionDto object to the Item property of an Auction object. This is useful when the CreateAuctionDto contains fields that should populate the Item object within an Auction.
-    // auction => auction.Item => specifies destination object that is being configured.
-    // options => options.MapFrom(s => s)
-    // specifies the source of the value that will be mapped to the destination member.
+    // map all props from dto to the property Item of auction class.
+    // MapFrom(s => s) part indicates that the Item property of the Auction should be mapped from the entire CreateAuctionDto instance. 
     CreateMap<CreateAuctionDto, Auction>()
       .ForMember(auction => auction.Item, options => options.MapFrom(s => s));
     CreateMap<CreateAuctionDto, Item>();
+    
+    CreateMap<AuctionDto, AuctionCreated>();
+
+    CreateMap<Auction, AuctionUpdated>().IncludeMembers(auction => auction.Item);
+    CreateMap<Item, AuctionUpdated>();
   }
 }

@@ -3,6 +3,8 @@ using AuctionService.DTOs;
 using AuctionService.Entities;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Contracts;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,14 +19,16 @@ public class AuctionController: ControllerBase
   //This is a private field that holds an instance of IMapper from AutoMapper. It is used to map between domain models and DTOs.
   private readonly IMapper _mapper;
   private readonly AuctionDbContext _context;
+  private readonly IPublishEndpoint _publishEndpoint;
   
 
   // constructor
-  public AuctionController(AuctionDbContext context, IMapper mapper)
+  public AuctionController(AuctionDbContext context, IMapper mapper, IPublishEndpoint publishEndpoint)
   { 
     // assigns the context parameter to the context field, allowing the controller to use the database context.
     _context = context;
     _mapper = mapper;
+    _publishEndpoint = publishEndpoint;
   }
 
   [HttpGet]
@@ -68,12 +72,19 @@ public class AuctionController: ControllerBase
     // add auction to context
     _context.Auctions.Add(auction);
 
+    var auctionToBePublished = _mapper.Map<AuctionDto>(auction);
+
+    // publish a msg of type auctioncreated to all subscribed consumers into service bus
+    await _publishEndpoint.Publish(
+      _mapper.Map<AuctionCreated>(auctionToBePublished)
+    );
+
     //save changes made in the context to db
     // If changes were successfully saved (i.e., the number of entries written is greater than 0), the condition evaluates to true.
     var result = await _context.SaveChangesAsync() > 0;
 
     if(!result) BadRequest("Could not save changes to the DB");
-
+    
     //   method returns an HTTP 201 (Created) response to the client with the Location header set to the URI of the newly created resource and the specified content 
     return CreatedAtAction(
       nameof(GetAuctionById), 
@@ -100,6 +111,9 @@ public class AuctionController: ControllerBase
     auction.Item.Mileage = updateAuctionDto.Mileage ?? auction.Item.Mileage;
     auction.Item.Year = updateAuctionDto.Year ?? auction.Item.Year;
 
+    // publish auctionupdated type of message to service bus
+    await _publishEndpoint.Publish(_mapper.Map<AuctionUpdated>(auction));
+
     var result = await _context.SaveChangesAsync() > 0;
 
     if (!result) return BadRequest("Problem when saving");
@@ -117,6 +131,8 @@ public class AuctionController: ControllerBase
     //TODO: check seller == username
 
     _context.Auctions.Remove(auction);
+
+    await _publishEndpoint.Publish<AuctionDeleted>(new { Id = auction.Id.ToString() });
 
     var result = await _context.SaveChangesAsync() > 0;
 

@@ -1,6 +1,8 @@
 using System.Net;
+using MassTransit;
 using Polly;
 using Polly.Extensions.Http;
+using SearchService;
 using SearchService.Data;
 using SearchService.Services;
 
@@ -8,8 +10,29 @@ var builder = WebApplication.CreateBuilder(args);
 
 // adds services to the DI containers
 builder.Services.AddControllers();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 // leverages the HttpClientFactory to configure and manage HttpClient instances used by the AuctionServiceHttpClient
 builder.Services.AddHttpClient<AuctionServiceHttpClient>().AddPolicyHandler(GetPolicy());
+builder.Services.AddMassTransit(x => {
+
+  x.AddConsumersFromNamespaceContaining<AuctionCreatedConsumer>();
+
+  //auctionCreated message will be named search-auction-created in rabbitmq console
+  x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("search", false));
+  // The parameter x is an instance of IBusRegistrationConfigurator, which is used to configure the MassTransit bus.
+  //  specifies that RabbitMQ should be used as the transport for MassTransit
+  x.UsingRabbitMq((context, config) => 
+  {
+    config.ReceiveEndpoint("search-auction-created", e =>
+    {
+      e.UseMessageRetry(r => r.Interval(5, 5));
+
+      e.ConfigureConsumer<AuctionCreatedConsumer>(context);
+    });
+    //  configure all endpoints (consumers, sagas, activities, etc.) that are registered in the MassTransit configuration. 
+    config.ConfigureEndpoints(context);
+  });
+});
 
 var app = builder.Build();
 
