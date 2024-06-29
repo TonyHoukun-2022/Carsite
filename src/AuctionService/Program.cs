@@ -1,5 +1,6 @@
 using AuctionService.Data;
 using MassTransit;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,6 +41,22 @@ builder.Services.AddMassTransit(x => {
   });
 });
 
+// 这行代码添加并配置了身份验证服务。JwtBearerDefaults.AuthenticationScheme 指定了默认的身份验证方案为 JWT Bearer Tokens。
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+  //添加了 JWT Bearer 处理程序，并配置了处理程序的选项。
+  .AddJwtBearer( opts => 
+  {
+    // 指定了 JWT Bearer 令牌的颁发者的 URL，identityServer的 URL
+    opts.Authority = builder.Configuration["IdentityServiceUrl"];
+    // identityServer runs on http
+    opts.RequireHttpsMetadata = false;
+    // 意味着在验证 JWT 令牌时，不会检查令牌中的 aud (Audience) 声明。这通常用于在开发或测试环境中，或者当你的应用程序不关心令牌的受众时。
+    opts.TokenValidationParameters.ValidateAudience = false;
+    // 自定义名称声明类型，使身份验证系统能够正确识别用户名称。
+    // so in this service, username of a user can be accessed by User.Identity.Name
+    opts.TokenValidationParameters.NameClaimType = "username";
+  });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -48,6 +65,8 @@ if (app.Environment.IsDevelopment())
 {
 
 }
+
+app.UseAuthentication();
 
 //  enforces authorization on the incoming requests. I
 app.UseAuthorization();
