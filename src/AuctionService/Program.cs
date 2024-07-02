@@ -18,7 +18,7 @@ builder.Services.AddDbContext<AuctionDbContext>(opt =>
 // AppDomain.CurrentDomain.GetAssemblies() 确保发现并注册所有这些配置文件 (继承自Profile的 class, 在这是MappingProfile)
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-// configures MassTransit, a popular .NET library for message-based applications, to use RabbitMQ as the message broker
+// configures MassTransit for message-based applications, to use RabbitMQ as the message broker
 builder.Services.AddMassTransit(x => {
 
   // The outbox pattern ensures that messages are not sent until the associated database transaction is committed successfully.
@@ -41,6 +41,13 @@ builder.Services.AddMassTransit(x => {
   //  specifies that RabbitMQ should be used as the transport for MassTransit
   x.UsingRabbitMq((context, config) => 
   {
+    //  configuring the connection to a RabbitMQ message broker from appsettings.json
+    config.Host(builder.Configuration["RabbitMq:Host"], "/", host => 
+    {
+      host.Username(builder.Configuration.GetValue("RabbitMq:Username","guest"));
+      host.Password(builder.Configuration.GetValue("RabbitMq:Password", "guest"));    
+    });
+
     //  configure all endpoints (consumers, sagas, activities, etc.) that are registered in the MassTransit configuration. 
     config.ConfigureEndpoints(context);
   });

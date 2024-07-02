@@ -23,6 +23,14 @@ builder.Services.AddMassTransit(x => {
   //  specifies that RabbitMQ should be used as the transport for MassTransit
   x.UsingRabbitMq((context, config) => 
   {
+
+    //  configuring the connection to a RabbitMQ message broker from appsettings.json
+    config.Host(builder.Configuration["RabbitMq:Host"], "/", host => 
+    {
+      host.Username(builder.Configuration.GetValue("RabbitMq:Username","guest"));
+      host.Password(builder.Configuration.GetValue("RabbitMq:Password", "guest"));    
+    });
+    
     config.ReceiveEndpoint("search-auction-created", e =>
     {
       e.UseMessageRetry(r => r.Interval(5, 5));
