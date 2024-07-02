@@ -1,3 +1,4 @@
+using AuctionService;
 using AuctionService.Data;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -31,6 +32,10 @@ builder.Services.AddMassTransit(x => {
 
     o.UseBusOutbox();
   });
+
+  x.AddConsumersFromNamespaceContaining<AuctionCreatedFaultConsumer>();
+
+  x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("auction", false));
 
   // The parameter x is an instance of IBusRegistrationConfigurator, which is used to configure the MassTransit bus.
   //  specifies that RabbitMQ should be used as the transport for MassTransit

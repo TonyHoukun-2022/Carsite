@@ -94,7 +94,7 @@ public class AuctionController: ControllerBase
 
   [Authorize]
   [HttpPut("{id}")]
-  public async Task<ActionResult> UpdateAuction(Guid id, UpdateAuctionDto updateAuctionDto)
+  public async Task<ActionResult<AuctionUpdated>> UpdateAuction(Guid id, UpdateAuctionDto updateAuctionDto)
   {
     var auction = await _context.Auctions
       .Include(auction => auction.Item)
@@ -118,7 +118,7 @@ public class AuctionController: ControllerBase
 
     if (!result) return BadRequest("Problem when saving");
 
-    return Ok(result);
+    return _mapper.Map<AuctionUpdated>(auction);
   }
 
   [Authorize]
@@ -140,6 +140,6 @@ public class AuctionController: ControllerBase
 
     if (!result) return BadRequest("Could not update db");
 
-    return Ok();
+    return Ok("item deleted");
   }
 }
