@@ -15,3 +15,7 @@ https://duendesoftware.com/products/identityserver
 # Implement OAuth 2.0 Authorization Code Flow
 
 # openID connect => identity provider
+
+### client side state management
+
+# zustand

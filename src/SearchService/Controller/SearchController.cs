@@ -17,32 +17,33 @@ public class SearchController : ControllerBase
     // query is targeting Item collection
     var query = DB.PagedSearch<Item, Item>();
 
-    // sorts the query results based on the Make property of the Item objects.
     query.Sort(item => item.Ascending(item => item.Make));
 
     if (!string.IsNullOrEmpty(searchParams.SearchTerm))
     { 
-      // Match(Search.Full, searchTerm) filters the results to match the full-text search term.
-      // SortByTextScore() sorts the results based on their relevance to the search term, ensuring the most relevant items appear first.
       query.Match(Search.Full, searchParams.SearchTerm).SortByTextScore();
     }
+    
+    /** query = searchParams.OrderBy switch
+    //     {
+    //         "make" => query.Sort(x => x.Ascending(a => a.Make)).Sort(x => x.Ascending(a => a.Model)),
+    //         "new" => query.Sort(x => x.Descending(a => a.CreatedAt)),
+    //         "endingSoon" => query.Sort(x => x.Ascending(a => a.AuctionEnd)),
+    //         _ => query // 默认情况下不进行额外排序
+    }; **/
 
-    query = searchParams.OrderBy switch
+    switch (searchParams.FilterBy)
     {
-      "make" => query.Sort(item => item.Ascending(item => item.Make)),
-      "new" => query.Sort(item => item.Descending(item => item.CreatedAt)),
-      // default sorting
-      _ => query.Sort(item => item.Ascending(item => item.AuctionEnd))
-    };
-
-    query = searchParams.FilterBy switch
-    {
-      "finished" => query.Match(i => i.AuctionEnd < DateTime.UtcNow),
-      "endingSoon" => query.Match(i => i.AuctionEnd < DateTime.UtcNow.AddHours(6)
-       && i.AuctionEnd > DateTime.UtcNow),
-      _ => query.Match(i => i.AuctionEnd > DateTime.UtcNow)
-
-    };
+      case "finished":
+          query.Match(x => x.AuctionEnd < DateTime.UtcNow);
+          break;
+      case "endingSoon":
+          query.Match(x => x.AuctionEnd < DateTime.UtcNow.AddHours(6) && x.AuctionEnd > DateTime.UtcNow);
+          break;
+      default:
+          query.Match(x => x.AuctionEnd > DateTime.UtcNow);
+          break;
+    }
 
     if (!string.IsNullOrEmpty(searchParams.Seller))
     {
@@ -54,17 +55,41 @@ public class SearchController : ControllerBase
       query.Match(i => i.Winner == searchParams.Winner);
     }
 
-    // sets the current page number for the paged search.
-    query.PageNumber(searchParams.PageNumber);
-    query.PageSize(searchParams.PageSize);
+    /** sets the current page number for the paged search.
+    // query.PageNumber(searchParams.PageNumber);
+    query.PageSize(searchParams.PageSize); **/
 
     var result = await query.ExecuteAsync();
 
+    var auctionItems = result.Results.ToList();
+
+    // sorting after fetch data
+    IEnumerable<Item> sortedItems = auctionItems;
+    if (!string.IsNullOrEmpty(searchParams.OrderBy)) {
+      sortedItems =searchParams.OrderBy switch
+      {
+        "make" => auctionItems.OrderBy(x => x.Make).ThenBy(x => x.Model),
+        "new" => auctionItems.OrderByDescending(x => x.CreatedAt),
+        "endingSoon" => auctionItems.OrderBy(x => x.AuctionEnd),
+         _ => auctionItems
+      };
+    }
+
+    // in-memory pagination
+    var paginatedItems = sortedItems
+      .Skip((searchParams.PageNumber - 1) * searchParams.PageSize)
+      .Take(searchParams.PageSize)
+      .ToList();
+
+    var totalCount = sortedItems.Count();
+    var pageCount = (int)Math.Ceiling(totalCount / (double)searchParams.PageSize);
+
+
     return Ok( new 
     {
-      results = result.Results,
-      pageCount = result.PageCount,
-      totalCount = result.TotalCount
+      results = paginatedItems,
+      pageCount,
+      totalCount
     });
   }
 }
