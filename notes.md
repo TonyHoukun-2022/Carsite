@@ -19,3 +19,7 @@ https://duendesoftware.com/products/identityserver
 ### client side state management
 
 # zustand
+
+### client-side
+
+# authentication => NextAuth (auth.js)

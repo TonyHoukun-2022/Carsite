@@ -16,6 +16,7 @@ services:
       #anonymous vol
       # delete container will delete associated data
       - /var/lib/postgresql/data
+
   mongodb:
     image: mongo
     environment:
@@ -25,7 +26,8 @@ services:
       - 27017:27017
     volumes:
       - /var/lib/mongodb/data
-      # - mongodata:/var/lib/mongodb/data
+      # - mongodata:/var/lib/mongodb
+
   # for async communications btw services
   rabbitMq:
     # lightweight version of RabbitMQ that includes the management plugin for easier monitoring and management.

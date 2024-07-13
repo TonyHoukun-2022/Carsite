@@ -17,7 +17,7 @@ export default function RootLayout({
       <body>
         <Navbar />
         <main className="container mx-auto px-5 pt-10">
-          {/* page.tsx  */}
+          {/* app/page.tsx  */}
           {children}
         </main>
       </body>
