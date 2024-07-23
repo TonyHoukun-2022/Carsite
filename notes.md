@@ -23,3 +23,7 @@ https://duendesoftware.com/products/identityserver
 ### client-side
 
 # authentication => NextAuth (auth.js)
+
+# React hook form
+
+# Error handling
