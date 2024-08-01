@@ -19,10 +19,11 @@ COPY src/IdentityService/IdentityService.csproj  src/IdentityService/IdentitySer
 # restore all the package dependencies for the projects.
 RUN dotnet restore Carsites.sln
 
-COPY src/SearchService src/SearchService
+# These lines copy the source code for the AuctionService and Contracts projects into the container.
+COPY src/NotificationService src/NotificationService
 COPY src/Contracts src/Contracts
 
-WORKDIR /app/src/SearchService
+WORKDIR /app/src/NotificationService
 
 # publishes the application in Release configuration and outputs the published files to the /app/src/out directory.
 RUN dotnet publish -c Release -o /app/src/out
@@ -33,4 +34,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 # copies the published files from the build stage to the /app
 COPY --from=build /app/src/out .
-ENTRYPOINT [ "dotnet", "SearchService.dll" ]
+ENTRYPOINT [ "dotnet", "NotificationService.dll" ]
+
+
+#### Build Stage: Uses the .NET SDK image to build the application. It restores dependencies, copies the source code, and publishes the application.
+#### Runtime Stage: Uses the ASP.NET Core runtime image to run the application. It copies the published files from the build stage and sets the entry point.

@@ -22,6 +22,10 @@ https://duendesoftware.com/products/identityserver
 
 ### bid svc as client
 
+# notification-svc with SignalR for live communication btw client & server
+
+### webSockets for connect client and notification-svc wutg signalR Hub
+
 ### client side state management
 
 # zustand
