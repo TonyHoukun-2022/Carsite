@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+//  gRPC service for fetching auction details
+option csharp_namespace = "AuctionService";
+
+// a gRPC service named GrpcAuction with a single RPC method GetAuction:
+// GetAuction: This method takes a request message of type GetAuctionReq and returns a response message of type GrpcAuctionRes.
+service GrpcAuction {
+  rpc GetAuction (GetAuctionReq) returns (GrpcAuctionRes);
+}
+
+message GetAuctionReq {
+  string id = 1; // number is the sequence of field
+}
+
+message GrpcAuctionModel {
+  string id = 1;
+  string seller = 2;
+  string auctionEnd = 3;
+  int32 reservePrice = 4;
+}
+
+// response for the GetAuction RPC method. It contains auction of type GrpcAuctionModel
+message GrpcAuctionRes {
+  GrpcAuctionModel auction = 1;
+}

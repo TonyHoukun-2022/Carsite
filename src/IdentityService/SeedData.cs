@@ -77,7 +77,7 @@ public class SeedData
       Log.Debug("bob already exists");
     }
 
-     var alice = userMgr.FindByNameAsync("alice").Result;
+    var alice = userMgr.FindByNameAsync("alice").Result;
     if (alice == null)
     {
       alice = new ApplicationUser

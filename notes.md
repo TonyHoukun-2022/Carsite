@@ -16,6 +16,12 @@ https://duendesoftware.com/products/identityserver
 
 # openID connect => identity provider
 
+# gRPC Google Remote Procedure Call => faster than http for communications btw svcs
+
+### auction svc as server
+
+### bid svc as client
+
 ### client side state management
 
 # zustand

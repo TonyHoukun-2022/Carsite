@@ -69,14 +69,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     opts.TokenValidationParameters.NameClaimType = "username";
   });
 
+builder.Services.AddGrpc();
+
+
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-// middlewares
-if (app.Environment.IsDevelopment())
-{
-
-}
 
 app.UseAuthentication();
 
@@ -85,6 +81,8 @@ app.UseAuthorization();
 
 // application's routes are determined by the controllers and their action methods.
 app.MapControllers();
+
+app.MapGrpcService<GrpcAuctionService>();
 
 try
 {
