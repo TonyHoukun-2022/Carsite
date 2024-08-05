@@ -15,7 +15,7 @@ namespace NotificationService.Consumers
     public async Task Consume(ConsumeContext<BidPlaced> context)
     {
       Console.WriteLine("--> Bid placed message received");
-  
+      //send bidplaced message to client side
       await _hubContext.Clients.All.SendAsync("BidPlaced", context.Message);
     }
   }

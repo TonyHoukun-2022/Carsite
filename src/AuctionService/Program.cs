@@ -32,7 +32,8 @@ builder.Services.AddMassTransit(x => {
 
     o.UseBusOutbox();
   });
-
+  
+  // adding all consumers by adding just 1
   x.AddConsumersFromNamespaceContaining<AuctionCreatedFaultConsumer>();
 
   x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("auction", false));

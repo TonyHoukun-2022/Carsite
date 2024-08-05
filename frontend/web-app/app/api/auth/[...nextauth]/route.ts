@@ -7,13 +7,12 @@ export const authOptions: NextAuthOptions = {
   },
   providers: [
     DuendeProvider({
-      id: 'id-server',
-      // as defined in Identity svc config
-      clientId: 'nextApp',
-      clientSecret: 'secret',
-      issuer: 'http://localhost:5000',
-      authorization: { params: { scope: 'openid profile auctionApp' } },
-      idToken: true,
+      id: 'id-server', // Unique identifier for the provider
+      clientId: 'nextApp', // Client ID as defined in the Identity service config
+      clientSecret: 'secret', // Client secret as defined in the Identity service config
+      issuer: 'http://localhost:5000', // The issuer URL of the Identity server
+      authorization: { params: { scope: 'openid profile auctionApp' } }, // Authorization parameters including scopes
+      idToken: true, // Include ID Token in the response
     }),
   ],
   callbacks: {
@@ -35,5 +34,5 @@ export const authOptions: NextAuthOptions = {
   },
 }
 
-const handler = NextAuth(authOptions)
-export { handler as GET, handler as POST }
+const handler = NextAuth(authOptions) // Initialize NextAuth with the defined options
+export { handler as GET, handler as POST } // Export the handler for GET and POST requests

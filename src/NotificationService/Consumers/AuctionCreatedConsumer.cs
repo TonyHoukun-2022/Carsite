@@ -18,7 +18,7 @@ namespace NotificationService.Consumers
     {
       Console.WriteLine("--> auction created message received");
 
-      //send received rabbitMq message as type of AuctionCreated and send it to all clients
+      //send to client
       await _hubContext.Clients.All.SendAsync("AuctionCreated", context.Message);
     }
   }

@@ -7,6 +7,7 @@ import DetailedSpecs from './DetailSpecs'
 import { getCurrentUser } from '@/app/apis/authApi'
 import EditButton from './EditButton'
 import DeleteButton from './DeleteButton'
+import BidList from './BidList'
 
 export default async function AuctionDetail({ params }: { params: { id: string } }) {
   const data = await getAuctionById(params.id)
@@ -26,7 +27,6 @@ export default async function AuctionDetail({ params }: { params: { id: string }
           )}
         </div>
 
-
         <div className="flex gap-3">
           <h3 className="text-2xl font-semibold">Time remaining:</h3>
           <CountdownTimer auctionEnd={data.auctionEnd} />
@@ -38,9 +38,7 @@ export default async function AuctionDetail({ params }: { params: { id: string }
           <CarImage imageUrl={data.imageUrl} />
         </div>
 
-        <div className='border-2 rounded-lg p-2 bg-gray-100'>
-          <Heading title='Bids' />
-        </div>
+        <BidList user={user} auction={data} />
       </div>
 
       <div className='mt-3 grid grid-cols-1 rounded-lg'>
@@ -48,7 +46,5 @@ export default async function AuctionDetail({ params }: { params: { id: string }
       </div>
 
     </div>
-
-
   )
 }

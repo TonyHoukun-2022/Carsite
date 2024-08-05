@@ -29,6 +29,7 @@ builder.Services.AddSignalR();
 
 var app = builder.Build();
 
+// signalR hub route
 app.MapHub<NotificationHub>("/notifications");
 
 
